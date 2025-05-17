@@ -1,3 +1,7 @@
+mod task;
+
+use task::Date;
 fn main() {
-    println!("Hello, world!");
+    let current_time = Date::new(11, 12, 2005);
+    current_time.print();
 }
