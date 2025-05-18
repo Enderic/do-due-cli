@@ -8,7 +8,17 @@ enum DateSpec {
 }
 
 impl DateSpec {
+    pub fn new_single(date: Date) -> Self {
+        DateSpec::Single(date)
+    }
 
+    pub fn new_range(start: Date, end: Date) -> Self {
+        DateSpec::Range(start, end)
+    }
+    
+    pub fn print(&self) {
+        
+    }
 }
 
 pub struct Date {
@@ -18,7 +28,7 @@ pub struct Date {
 }
 
 impl Date {
-    pub fn new(month: u8, day: u8, year: u16) -> Date {
+    pub fn new(month: u8, day: u8, year: u16) -> Self {
         Date {
             month,
             day,
