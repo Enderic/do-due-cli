@@ -1,23 +1,14 @@
-pub struct Task {
-
+pub enum DateSpec<'a, 'b> {
+    Single(&'a Date),
+    Range(&'a Date, &'b Date),
 }
 
-enum DateSpec {
-    Single(Date),
-    Range(Date, Date),
-}
-
-impl DateSpec {
-    pub fn new_single(date: Date) -> Self {
-        DateSpec::Single(date)
-    }
-
-    pub fn new_range(start: Date, end: Date) -> Self {
-        DateSpec::Range(start, end)
-    }
-    
+impl<'a, 'b> DateSpec<'a, 'b> {
     pub fn print(&self) {
-        
+        match self {
+            Self::Single(date) => println!("single type: {}", date.to_string()),
+            Self::Range(start, end) => println!("range type: {}-{}", start.to_string(), end.to_string()),
+        }   
     }
 }
 
@@ -37,6 +28,10 @@ impl Date {
     }
 
     pub fn print(&self) {
-        println!("{}-{}-{}", self.month, self.day, self.year);
+        println!("{}/{}/{}", self.month, self.day, self.year);
+    }
+
+    pub fn to_string(&self) -> String {
+        format!("{}/{}/{}", self.month, self.day, self.year)
     }
 }
