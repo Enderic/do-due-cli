@@ -1,3 +1,17 @@
+pub struct Task<'a, 'b> {
+    pub due_date: DateSpec<'a, 'b>,
+    pub do_date: DateSpec<'a, 'b>,
+    pub name: &'a str,
+    pub desc: &'a str,
+    pub priority: Priority,
+}
+
+pub enum Priority {
+    Low,
+    Medium,
+    High,
+}
+
 pub enum DateSpec<'a, 'b> {
     Single(&'a Date),
     Range(&'a Date, &'b Date),
