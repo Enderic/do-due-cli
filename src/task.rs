@@ -6,6 +6,26 @@ pub struct Task<'a> {
     pub priority: Priority,
 }
 
+impl<'a> Task<'a> {
+    pub fn new(due_date: DateSpec<'a>, do_date: DateSpec<'a>, name: &'a str, desc: &'a str, priority: Priority) -> Self {
+        Task {
+            due_date,
+            do_date,
+            name,
+            desc,
+            priority,
+        }
+    }
+
+    pub fn print(&self) {
+        println!("{}", self.to_string());
+    }
+
+    pub fn to_string(&self) -> String {
+        format!("Task: {} | {} | {}", self.name, self.do_date.to_string(), self.due_date.to_string())
+    }
+}
+
 pub enum Priority {
     Low,
     Medium,
@@ -23,6 +43,13 @@ impl<'a> DateSpec<'a> {
             Self::Single(date) => println!("single type: {}", date.to_string()),
             Self::Range(start, end) => println!("range type: {}-{}", start.to_string(), end.to_string()),
         }   
+    }
+
+    pub fn to_string(&self) -> String {
+        match self {
+            Self::Single(date) => format!("{}", date.to_string()),
+            Self::Range(start, end) => format!("{} - {}", start.to_string(), end.to_string()),
+        }  
     }
 }
 
