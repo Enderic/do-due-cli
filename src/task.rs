@@ -76,3 +76,13 @@ impl Date {
         format!("{}/{}/{}", self.month, self.day, self.year)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_1() {
+        
+    }
+}

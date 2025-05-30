@@ -1,56 +1,33 @@
 mod task;
-mod list;
 
-use std::fs;
-use std::io::BufRead;
-use std::io::BufReader;
+use std::{fs, env};
+use std::io::{self, BufRead, BufReader, Write};
 
-use clap::Parser;
+use clap::{Arg, Command, command};
 
 use task::Task;
-use task::Date;
-use task::DateSpec;
+
 
 fn main() {
-    // Get file
-    let file_name = "tasks.txt";
+    let matches = command!()
+        .subcommand(
+            Command::new("add")
+                .about("Add a new task")
+        )
+        .get_matches();
 
-    let file = fs::File::open(file_name).unwrap_or_else(|err| {
-        fs::File::create(file_name).unwrap()
-    });
+    match matches.subcommand() {
+        Some(("add", _sub_m)) => {
+            print!("Testing input: ");
+            io::stdout().flush().unwrap();
+            let mut input = String::new();
+            let _test = io::stdin().read_line(&mut input);
+            println!("You typed: {}", input);
+        }
+        _ => {
 
-    let task_list: Vec<Task> = Vec::new();
-    let reader = BufReader::new(file);
-
-    for line in reader.lines() {
-        if let Ok(l) = line {
-            println!("Line: {}", l);
         }
     }
-
-    /*
-    let current_time = Date::new(11, 12, 2005);
-    current_time.print();
-
-    let do_date = DateSpec::Single(&current_time);
-    do_date.print();
-
-    let end_date = Date::new(4, 12, 2014);
-    let due_date = DateSpec::Range(&current_time, &end_date);
-    due_date.print();
-
-    do_date.print();
-    */
-
-    /* 
-    Add task:
-        - Ask for name
-        - Ask for due date
-        - Ask for do date
-        - Ask for description
-        - Ask for priority
-        - Create task & put in list
-    */
 }
 
 fn init() {
