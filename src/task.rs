@@ -1,13 +1,13 @@
-pub struct Task<'a> {
-    pub due_date: DateSpec<'a>,
-    pub do_date: DateSpec<'a>,
-    pub name: &'a str,
-    pub desc: &'a str,
+pub struct Task {
+    pub due_date: DateSpec,
+    pub do_date: DateSpec,
+    pub name: String,
+    pub desc: String,
     pub priority: Priority,
 }
 
-impl<'a> Task<'a> {
-    pub fn new(due_date: DateSpec<'a>, do_date: DateSpec<'a>, name: &'a str, desc: &'a str, priority: Priority) -> Self {
+impl Task {
+    pub fn new(due_date: DateSpec, do_date: DateSpec, name: String, desc: String, priority: Priority) -> Self {
         Task {
             due_date,
             do_date,
@@ -32,12 +32,12 @@ pub enum Priority {
     High,
 }
 
-pub enum DateSpec<'a> {
-    Single(&'a Date),
-    Range(&'a Date, &'a Date),
+pub enum DateSpec {
+    Single(Date),
+    Range(Date, Date),
 }
 
-impl<'a> DateSpec<'a> {
+impl DateSpec {
     pub fn print(&self) {
         match self {
             Self::Single(date) => println!("single type: {}", date.to_string()),
