@@ -1,13 +1,13 @@
 pub struct Task {
-    pub due_date: DateSpec,
-    pub do_date: DateSpec,
     pub name: String,
+    pub do_date: DateSpec,
+    pub due_date: DateSpec,
     pub desc: String,
     pub priority: Priority,
 }
 
 impl Task {
-    pub fn new(due_date: DateSpec, do_date: DateSpec, name: String, desc: String, priority: Priority) -> Self {
+    pub fn new(name: String, do_date: DateSpec, due_date: DateSpec, desc: String, priority: Priority) -> Self {
         Task {
             due_date,
             do_date,
@@ -50,6 +50,12 @@ impl DateSpec {
             Self::Single(date) => format!("{}", date.to_string()),
             Self::Range(start, end) => format!("{} - {}", start.to_string(), end.to_string()),
         }  
+    }
+
+    pub fn validate(input: String) -> Result<DateSpec, &'static str> {
+        if input.len() != 10 || input.len() != 21 {
+            return Err("Input not valid.");
+        }
     }
 }
 

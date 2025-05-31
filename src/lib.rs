@@ -9,6 +9,21 @@ pub struct Config {
     pub list: Vec<Task>,
 }
 
+impl Config {
+    pub fn build(path: &str) -> Config {
+        let file = File::open(path).unwrap_or_else(|_| {
+            File::create(path).expect("Couldn't create a file")
+        });
+
+        let list: Vec<Task> = Vec::new();
+
+        Config {
+            file,
+            list,
+        }
+    }
+}
+
 pub fn get_input(msg: &str) -> Result<String, io::Error> {
     print!("{}", msg);
     io::stdout().flush().unwrap();
