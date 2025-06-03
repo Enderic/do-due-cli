@@ -1,8 +1,11 @@
 use std::fs::File;
-use std::io::{self, Write};
+use std::io::{self, BufRead, BufReader, Write};
+use std::process;
 
 pub mod task;
 use task::Task;
+use task::DateSpec;
+use task::Priority;
 
 pub struct Config {
     pub file: File,
@@ -11,34 +14,88 @@ pub struct Config {
 
 impl Config {
     pub fn build(path: &str) -> Config {
-        let file = File::open(path).unwrap_or_else(|_| {
+        let file: File = File::open(path).unwrap_or_else(|_| {
             File::create(path).expect("Couldn't create a file")
         });
 
-        let list: Vec<Task> = Vec::new();
+        let mut list: Vec<Task> = Vec::new();
+
+        let reader: BufReader<&File> = BufReader::new(&file);
+
+        for line_result in reader.lines() {
+            let line = line_result.unwrap_or_else(|err|{
+                eprintln!("I/O Error, might need to reset tasks: {}", err.to_string());
+                process::exit(1);
+            });
+
+            let components: Vec<&str> = line.split("|").collect();
+            
+            let name = components[0];
+            let do_date = DateSpec::validate(components[1]).unwrap_or_else(|_| {
+                eprintln!("Can't initialize program 1, reset program.");
+                process::exit(1);
+            });
+
+            let due_date = DateSpec::validate(components[2]).unwrap_or_else(|_| {
+                eprintln!("Can't initialize program 2, reset program.");
+                process::exit(1);
+            });
+
+            let priority = Priority::validate(components[3]);
+            let desc = components[4];
+
+            let task = Task::new(name.to_string(), do_date, due_date, desc.to_string(), priority);
+
+            list.push(task);
+        }
 
         Config {
             file,
             list,
         }
     }
+
+    pub fn insert(&mut self, task: Task) {
+        self.list.push(task);
+    }
+
+    pub fn print(&self) {
+        for task in &self.list {
+            task.print();
+        }
+    }
 }
 
-pub fn get_input(msg: &str) -> Result<String, io::Error> {
+pub fn get_input(msg: &str) -> Result<String, String> {
     print!("{}", msg);
     io::stdout().flush().unwrap();
 
-    let mut input = String::new();
-    let _ = io::stdin().read_line(&mut input)?;
+    let mut input: String = String::new();
+    let test: Result<usize, io::Error> = io::stdin().read_line(&mut input);
+
+    match test {
+        Err(e) => return Err(format!("Problem getting input: {}", e)),
+        _ => ()
+    }
+
+    if input.len() < 1 {
+        return Err("Input can't be empty".to_string());
+    }
 
     Ok(input)
 }
 
-pub fn validate_name(name: String) {
-    // If name doesn't exist for another task
-}
+pub fn get_input_empty(msg: &str) -> Result<String, String> {
+    print!("{}", msg);
+    io::stdout().flush().unwrap();
 
-pub fn validate_date(date: String) {
-    // Validate format
-}
+    let mut input: String = String::new();
+    let test: Result<usize, io::Error> = io::stdin().read_line(&mut input);
 
+    match test {
+        Err(e) => return Err(format!("Problem getting input: {}", e)),
+        _ => ()
+    }
+
+    Ok(input)
+}

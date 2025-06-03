@@ -1,10 +1,12 @@
-use do_due_cli::*;
+use std::process;
+
+use do_due_cli::{task::{DateSpec, Priority, Task}, *};
 
 use clap::{Command, command};
 
 fn main() {
 
-    let config = Config::build("tasks.txt");
+    let mut config: Config = Config::build("tasks.txt");
     
     let matches = command!()
         .subcommand(
@@ -15,22 +17,46 @@ fn main() {
 
     match matches.subcommand() {
         Some(("add", _)) => {
-            let name = get_input("Enter the name of the task: ")
-                .unwrap_or_else(|_| "Error processing input".to_string());
+            let name: String = get_input("Enter the name of the task: ").unwrap_or_else(|err: String| {
+                eprintln!("Error processing input: {err}");
+                process::exit(1);
+            });
 
-            let do_date = get_input("Enter the do date of the task: ")
-                .expect("Problem getting do date");
+            let do_date_input: String = get_input("Enter the do date of the task (Format should be MM/DD/YYYY or MM/DD/YYYY-MM/DD/YYYY: ").unwrap_or_else(|err: String| {
+                eprintln!("Error processing input: {err}");
+                process::exit(1);
+            });
 
-            let due_date = get_input("Enter the due date of the task: ")
-                .expect("Problem getting due date");
+            let do_date = DateSpec::validate(&do_date_input).unwrap_or_else(|err| {
+                eprintln!("Error processing input: {err}");
+                process::exit(1);
+            });
 
-            let priority = get_input("Enter the priority of the task: ")
-                .expect("Problem getting priority");
+            let due_date_input: String = get_input("Enter the due date of the task (Format should be MM/DD/YYYY or MM/DD/YYYY-MM/DD/YYYY: ").unwrap_or_else(|err: String| {
+                eprintln!("Error processing input: {err}");
+                process::exit(1);
+            });
 
-            let description = get_input("Enter the description of the task: ")
-                .expect("Problem getting description");
+            let due_date = DateSpec::validate(&due_date_input).unwrap_or_else(|_| {
+                eprintln!("Error processing input.");
+                process::exit(1);
+            });
 
-            println!("You typed: {}", name);
+            let priority_input: String = get_input("Enter the priority of the task (High, Medium, Low, or None, any bad input will default to None: ").unwrap_or_else(|err: String| {
+                eprintln!("Error processing input: {err}");
+                process::exit(1);
+            });
+
+            let priority = Priority::validate(&priority_input);
+
+            let desc: String = get_input_empty("Enter the description of the task: ").unwrap_or_else(|err: String| {
+                eprintln!("Error processing input: {err}");
+                process::exit(1);
+            });
+
+            let task = Task::new(name, do_date, due_date, desc, priority);
+
+            config.insert(task);
         }
         _ => {
 
