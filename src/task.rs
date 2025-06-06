@@ -22,7 +22,7 @@ impl Task {
     }
 
     pub fn to_string(&self) -> String {
-        format!("{}|{}|{}", self.name, self.do_date.to_string(), self.due_date.to_string())
+        format!("{}|{}|{}|{}|{}", self.name.trim(), self.do_date.to_string(), self.due_date.to_string(), self.priority.as_str(), self.desc.trim())
     }
 }
 
@@ -35,10 +35,21 @@ pub enum Priority {
 
 impl Priority {
     pub fn validate(input: &str) -> Priority {
-        if input == "High" { return Priority::High }
-        else if input == "Medium" { return Priority::Medium }
-        else if input == "Low" { return Priority::Low }
-        else { Priority::None }
+        match input {
+            "High" => Priority::High,
+            "Medium" => Priority::Medium,
+            "Low" => Priority::Low,
+            _ => Priority::None,
+        }
+    }
+
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Priority::High => "High",
+            Priority::Medium => "Medium",
+            Priority::Low => "Low",
+            Priority::None => "None",
+        }
     }
 }
 
@@ -49,45 +60,41 @@ pub enum DateSpec {
 
 impl DateSpec {
     pub fn validate(input: &str) -> Result<DateSpec, String> {
-    // Handle range format: MM/DD/YYYY-MM/DD/YYYY
-    let input = input.trim();
-    if input.len() == 21 {
-        let dates: Vec<&str> = input.split('-').collect();
-        if dates.len() != 2 {
-            return Err("Range must contain exactly one '-' between two dates".to_string());
+        let input = input.trim();
+
+        // Range format: MM/DD/YYYY-MM/DD/YYYY or M/D/YYYY-M/D/YYYY
+        if input.contains('-') {
+            let dates: Vec<&str> = input.split('-').collect();
+            if dates.len() != 2 {
+                return Err("Range must contain exactly one '-' between two dates".to_string());
+            }
+
+            let start = DateSpec::parse_date(dates[0].trim())?;
+            let end = DateSpec::parse_date(dates[1].trim())?;
+            return Ok(DateSpec::Range(start, end));
         }
 
-        let start = DateSpec::parse_date(dates[0].trim())?;
-        let end = DateSpec::parse_date(dates[1].trim())?;
-
-        return Ok(DateSpec::Range(start, end));
-    }
-    // Handle single date format: MM/DD/YYYY
-    else if input.len() == 10 {
+        // Single format: MM/DD/YYYY or M/D/YYYY
         let single = DateSpec::parse_date(input)?;
-        return Ok(DateSpec::Single(single));
+        Ok(DateSpec::Single(single))
     }
 
-    Err("Invalid input length. Use 'MM/DD/YYYY' or 'MM/DD/YYYY-MM/DD/YYYY'.".to_string())
-}
+    fn parse_date(date_str: &str) -> Result<Date, String> {
+        let parts: Vec<&str> = date_str.trim().split('/').collect();
+        if parts.len() != 3 {
+            return Err("Date must be in M/D/YYYY or MM/DD/YYYY format".to_string());
+        }
 
-fn parse_date(date_str: &str) -> Result<Date, String> {
-    let parts: Vec<&str> = date_str.split('/').collect();
-    if parts.len() != 3 {
-        return Err("Date must be in MM/DD/YYYY format".to_string());
+        let month: u8 = parts[0].parse().map_err(|_| "Invalid month".to_string())?;
+        let day: u8 = parts[1].parse().map_err(|_| "Invalid day".to_string())?;
+        let year: u16 = parts[2].parse().map_err(|_| "Invalid year".to_string())?;
+
+        if !(1..=12).contains(&month) || !(1..=31).contains(&day) {
+            return Err("Date values out of range".to_string());
+        }
+
+        Ok(Date::new(month, day, year))
     }
-
-    let month: u8 = parts[0].parse().map_err(|_| "Invalid month".to_string())?;
-    let day: u8 = parts[1].parse().map_err(|_| "Invalid day".to_string())?;
-    let year: u16 = parts[2].parse().map_err(|_| "Invalid year".to_string())?;
-
-    if !(1..=12).contains(&month) || !(1..=31).contains(&day) {
-        return Err("Date values out of range".to_string());
-    }
-
-    Ok(Date::new(month, day, year))
-}
-
 
     pub fn print(&self) {
         match self {

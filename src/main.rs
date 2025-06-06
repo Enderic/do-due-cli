@@ -2,7 +2,7 @@ use std::process;
 
 use do_due_cli::{task::{DateSpec, Priority, Task}, *};
 
-use clap::{Command, command};
+use clap::{command, Arg, Command};
 
 fn main() {
 
@@ -12,6 +12,20 @@ fn main() {
         .subcommand(
     Command::new("add")
                 .about("Add a new task")
+        )
+        .subcommand(
+            Command::new("delete")
+                .about("Deletes an existing task")
+                .arg(
+                    Arg::new("name")
+                        .index(1)
+                        .required(true)
+                        .help("The name of the task to delete")
+                )
+        )
+        .subcommand(
+            Command::new("list")
+                .about("Lists all tasks & their details")
         )
         .get_matches();
 
@@ -57,9 +71,13 @@ fn main() {
             let task = Task::new(name, do_date, due_date, desc, priority);
 
             config.insert(task);
+        },
+        Some(("delete", sub_m)) => {
+            let name = sub_m.get_one::<String>("name").unwrap();
+            config.delete(name.clone());
         }
-        _ => {
-
-        }
+        _ => ()
     }
+
+    let _ = config.end();
 }

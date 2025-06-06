@@ -1,4 +1,4 @@
-use std::fs::File;
+use std::fs::{self, File};
 use std::io::{self, BufRead, BufReader, Write};
 use std::process;
 
@@ -29,10 +29,14 @@ impl Config {
             });
 
             let components: Vec<&str> = line.split("|").collect();
+
+            if components.len() != 5 {
+                continue;
+            }
             
             let name = components[0];
-            let do_date = DateSpec::validate(components[1]).unwrap_or_else(|_| {
-                eprintln!("Can't initialize program 1, reset program.");
+            let do_date = DateSpec::validate(components[1]).unwrap_or_else(|err| {
+                eprintln!("Can't initialize program 1, reset program: {}", err);
                 process::exit(1);
             });
 
@@ -59,10 +63,31 @@ impl Config {
         self.list.push(task);
     }
 
+    pub fn delete(&mut self, task_name: String) {
+        let mut count = 0;
+        for task in &self.list {
+            if task.name == task_name {
+                self.list.remove(count);
+                break;
+            }
+            count += 1;
+        }
+    }
+
     pub fn print(&self) {
         for task in &self.list {
             task.print();
         }
+    }
+
+    pub fn end(&mut self) -> std::io::Result<()> {
+        self.file = File::create("tasks.txt")?;
+
+        for task in &self.list {
+            writeln!(self.file, "{}", task.to_string())?;
+        }
+
+        Ok(())
     }
 }
 
